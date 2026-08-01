@@ -237,31 +237,41 @@ with tab1:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    fig_map = go.Figure(go.Choropleth(
-        locations=sample_map_data["country"],
-        locationmode="country names",
-        z=sample_map_data["count"],
-        text=sample_map_data["top_role"],
-        colorscale=[[0, "#e6f1fb"], [0.3, "#378add"], [1, "#0c447c"]],
-        hovertemplate="<b>%{location}</b><br>Postings: %{z}<br>Top Role: %{text}<extra></extra>",
-        colorbar=dict(
-            title=dict(text="Postings", font=dict(size=11, color="#7a9ab5")),
-            thickness=8, len=0.4, x=1.01,
-            bgcolor="rgba(0,0,0,0)", borderwidth=0,
-            tickfont=dict(size=10, color="#7a9ab5"),
+    COUNTRY_LONLAT = {
+        "Kenya": (37.9, 0.0), "Ethiopia": (38.7, 9.1), "Somalia": (46.2, 5.2),
+        "Sudan": (30.2, 12.9), "South Korea": (127.8, 35.9), "Germany": (10.4, 51.2),
+        "France": (2.2, 46.2), "Brazil": (-51.9, -14.2), "Jordan": (36.2, 31.0),
+        "Ukraine": (31.2, 48.4),
+    }
+    sample_map_data["lon"] = sample_map_data["country"].map(lambda c: COUNTRY_LONLAT[c][0])
+    sample_map_data["lat"] = sample_map_data["country"].map(lambda c: COUNTRY_LONLAT[c][1])
+
+    fig_map = go.Figure(go.Scattergeo(
+        lon=sample_map_data["lon"],
+        lat=sample_map_data["lat"],
+        text=sample_map_data.apply(
+            lambda r: f"<b>{r['country']}</b><br>Postings: {r['count']}<br>Top Role: {r['top_role']}",
+            axis=1,
         ),
-        marker_line_color="#ffffff",
-        marker_line_width=0.8,
+        hovertemplate="%{text}<extra></extra>",
+        mode="markers",
+        marker=dict(
+            size=sample_map_data["count"].apply(lambda c: (c ** 0.5) * 3.2),
+            sizemode="diameter",
+            color="#4fc3f7",
+            opacity=0.85,
+            line=dict(color="#bfe9ff", width=1),
+        ),
     ))
     fig_map.update_layout(
         margin={"r": 0, "t": 0, "l": 0, "b": 0},
-        paper_bgcolor="#f4f6fb",
+        paper_bgcolor="#012235",
         geo=dict(
-            showframe=False, showcoastlines=True, coastlinecolor="#d0dce8",
-            showland=True, landcolor="#f0f3f7",
-            showocean=True, oceancolor="#ddeef7",
-            showlakes=False, showcountries=True, countrycolor="#d0dce8",
-            bgcolor="#f4f6fb", projection_type="natural earth",
+            showframe=False, showcoastlines=False,
+            showland=True, landcolor="#0a3a5c",
+            showocean=True, oceancolor="#012235",
+            showlakes=False, showcountries=True, countrycolor="#124a72",
+            bgcolor="#012235", projection_type="natural earth",
             lonaxis=dict(range=[-150, 160]), lataxis=dict(range=[-55, 80]),
         ),
         height=310,
